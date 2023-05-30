@@ -1,0 +1,51 @@
+name: "Build test container"
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - "*"
+    paths:
+      - "test-app"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Auth to AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: "ap-southeast-1"
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: "deployment"
+          role-duration-seconds: 300 # 5 minutes
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/aws-app-runner-scale-test"
+        with:
+          context: ./.
+          file: ./Dockerfile
+          push: true
+          tags: ${{env.REGISTRY}}:${{github.run_number}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
