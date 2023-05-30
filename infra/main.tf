@@ -53,8 +53,33 @@ module "oidc" {
   iam_role_name        = "ecr-access-role"
   github_repositories  = ["Antvirf/aws-app-runner-scale-test"]
   iam_role_policy_arns = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"]
+
+
 }
 
+// create user and grant it the ecr-access-role
+resource "aws_iam_user" "ecr-user" {
+  name = "ecr-user"
+}
+
+
+resource "aws_iam_user_policy_attachment" "ecr-user-attachment" {
+  user       = aws_iam_user.ecr-user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+}
+
+resource "aws_iam_access_key" "ecr-user-key" {
+  user = aws_iam_user.ecr-user.name
+}
+
+output "ecr-user-access-key" {
+  value = aws_iam_access_key.ecr-user-key.id
+}
+
+output "ecr-user-secret-key" {
+  value     = aws_iam_access_key.ecr-user-key.secret
+  sensitive = true
+}
 
 module "ecr" {
   source  = "terraform-aws-modules/ecr/aws"
