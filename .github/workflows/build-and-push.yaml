@@ -41,11 +41,13 @@ jobs:
         uses: docker/build-push-action@v4
         id: build-image
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/aws-app-runner-scale-test
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "test-ecr"
+          IMAGE_TAG: ${{ github.run_number }}
         with:
           context: ./.
           file: ./Dockerfile
           push: true
-          tags: ${{env.REGISTRY}}:${{github.run_number}}
+          tags: ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
           cache-from: type=gha
           cache-to: type=gha,mode=max
