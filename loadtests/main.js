@@ -3,16 +3,19 @@ import http from 'k6/http';
 
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 
-const endpoint = "https://txh3vgn4dm.ap-southeast-1.awsapprunner.com/";
+const endpoint = ""; // Update with the HTTPS URL of your specific App Runner service
 
 export const options = {
     scenarios: {
-        main: {
-            executor: 'constant-vus',
-            vus: 500,
-            duration: '5m',
-        }
-    }
+        rps_test: {
+            executor: 'constant-arrival-rate',
+            rate: 100,
+            timeUnit: '1s',
+            duration: `5m`,
+            preAllocatedVUs: 10000,
+            maxVUs: 10000,
+        },
+    },
 };
 
 export function handleSummary(data) {
@@ -23,7 +26,6 @@ export function handleSummary(data) {
 }
 
 export default function () {
-    // Open app - basic unauth fetches
     const resTC = http.get(`${endpoint}/api/test`);
     check(resTC, { 'response status was 200 OK': (r) => r.status == 200 });
 }
