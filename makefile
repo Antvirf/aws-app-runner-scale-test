@@ -16,4 +16,4 @@ infra:
 
 loadtest:
 	cd loadtests && \
-	k6 run main.js
+	k6 run --out json=result.json main.js

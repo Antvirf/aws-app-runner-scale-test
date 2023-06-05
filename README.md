@@ -39,10 +39,19 @@ The test app is a [simple Go application](./test-app/main.go) that responds to H
 
 ## Load tests
 
-Load tests will be done with [K6](https://github.com/grafana/k6), and monitored with Cloud Watch. The load test script is [here](./loadtests/main.js).
+Load tests will be done with [K6](https://github.com/grafana/k6), and monitored with Cloud Watch. The load test script is [here](./loadtests/main.js), though it is updated manually between test runs.
 
-Test specifics WIP
+Testing config:
+- Minimum instances: 1
+- Maximum instances: 1 (single instance), 5 (multi-instance)
+- Concurrency: 1
+- vCPU: 1
+- Memory: 2 GB
+
+Test loads range from 50 to 900 RPS. Maximum load for 1 container is somewhere between 100-150 RPS. Maximum load for 5 containers is approx. 600 RPS.
 
 ## Results
 
-WIP
+See the [analysis](./loadtests/analysis.ipynb) Jupyter Notebook for results.
+
+With instantaneous max load, App Runner seems to be able to scale from 0 to 5 instances within 1 minute, though there are some performance hiccups later on that will need to be investigated further.
